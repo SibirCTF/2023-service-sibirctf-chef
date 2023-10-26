@@ -1,0 +1,25 @@
+version: '2.4'
+
+services:
+  chef:
+    build: 
+      context: .
+    container_name: chef-sb
+    restart: always
+    ports:
+      - "6666:6666"
+    volumes:
+      - "chef_storage:/opt/chef/storage"
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+          pids: 64
+
+volumes:
+  chef_storage:
+    driver_opts:
+      device: tmpfs
+      type: tmpfs
+      o: size=1g
