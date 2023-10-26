@@ -23,7 +23,7 @@
 #define TRUE 1
 #define FALSE 0
 #define SESS_TO 5
-#define SOCK_TO 30
+#define SOCK_TO 60
 #define SECOND 1000000
 #define SERV_TICK 50000
 #define MAX_COMMANDS 64

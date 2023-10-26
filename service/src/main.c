@@ -149,7 +149,7 @@ void* connection_handler(psession session){
                     reply(session->connfd, "ERR_INVALID_DIR", BUFFER/4);
                     break;
                 }
-                if (fseek(session->fd, 0, SEEK_END) > DATASTORE){
+                if (ftell(session->fd) > DATASTORE*4){
                     reply(session->connfd, "ERR_NO_SPC_LEFT", BUFFER/4);
                     break;
                 }
