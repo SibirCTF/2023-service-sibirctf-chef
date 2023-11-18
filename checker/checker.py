@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import socket, os, re, errno, sys, uuid, logging
+import traceback
 
 class Client(object):
     def __init__(self, address, port):
@@ -242,8 +243,11 @@ class Checker(object):
         except socket.error as serr:
             if serr.errno == errno.ECONNREFUSED:
                 service_down()
+            elif serr.errno == errno.EHOSTUNREACH:
+                service_down()
             else:
-                print(serr)
+                print(traceback.format_exc())
+                print("except error: ", str(serr), " ")
                 service_corrupt()
 
     def check(self):
